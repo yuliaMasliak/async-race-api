@@ -38,6 +38,38 @@ app.use(express.json());
 
 const state = { velocity: {}, blocked: {} };
 
+app.get('/garage', (req, res) => {
+  res.json(garage);
+});
+app.get('/garage/:id', (req, res) => {
+  const car = garage.forEach((car) => car.id == Number(req.params.id));
+  if (car.length === 0) {
+    return res.status(400).json({
+      error: 'NOT FOUND'
+    });
+  } else {
+    res.json(car);
+  }
+});
+
+app.post('./garage', (req, res) => {
+  const idGenerator = () => {
+    return garage.length ? Math.max(...garage.map((car) => car.id)) + 1 : 0;
+  };
+  if (!req.body.name || !req.body.color) {
+    return res.status(400).json({
+      error: 'data is missing'
+    });
+  }
+  const car = {
+    id: idGenerator(),
+    name: req.body.name,
+    color: req.body.color
+  };
+  garage.concat(car);
+  res.json(car);
+});
+
 app.patch('/engine', (req, res) => {
   const { id, status } = req.query;
 
@@ -120,4 +152,6 @@ app.patch('/engine', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
