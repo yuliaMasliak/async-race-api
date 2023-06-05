@@ -207,9 +207,7 @@ app.get('/winners/:id', (req, res) => {
 });
 
 app.post('/winners', (req, res) => {
-  console.log(Number(req.body.id));
   const existingCar = garage.find((car) => car.id == Number(req.body.id));
-  console.log(existingCar);
   const existingWinner = winners.find((car) => car.id == Number(req.body.id));
 
   if (!existingCar) {
@@ -235,6 +233,43 @@ app.post('/winners', (req, res) => {
     winners = winners.concat(winner);
     res.json(winner);
   }
+});
+
+app.delete('/winner/:id', (req, res) => {
+  const winner = winners.find((car) => car.id == Number(req.params.id));
+  if (!winner) {
+    return res.status(404).json({
+      error: 'WINNER NOT FOUND'
+    });
+  }
+  winners.forEach((car) => {
+    if (car.id == Number(req.params.id)) {
+      winners = winners.filter((car) => car.id !== Number(req.params.id));
+      res.json({});
+    }
+  });
+});
+
+app.put('/winners/:id', (req, res) => {
+  console.log(req.params.id);
+  const winner = winners.find((car) => car.id == Number(req.params.id));
+  if (!winner) {
+    return res.status(400).json({
+      error: 'WINNER NOT FOUND'
+    });
+  }
+  const updatedCar = {
+    wins: req.body.wins,
+    time: req.body.time,
+    id: req.params.id
+  };
+  winners.forEach((car) => {
+    if (car.id == Number(req.params.id)) {
+      car.wins = Number(req.params.wins);
+      car.time = Number(req.params.time);
+      res.json(updatedCar);
+    }
+  });
 });
 
 const PORT = process.env.PORT || 3000;
