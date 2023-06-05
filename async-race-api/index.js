@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
-const garage = [
+let garage = [
   {
     name: 'Tesla',
     color: '#e6e6fa',
@@ -52,7 +52,7 @@ app.get('/garage/:id', (req, res) => {
   }
 });
 
-app.post('./garage', (req, res) => {
+app.post('/garage', (req, res) => {
   const idGenerator = () => {
     return garage.length ? Math.max(...garage.map((car) => car.id)) + 1 : 0;
   };
@@ -61,12 +61,14 @@ app.post('./garage', (req, res) => {
       error: 'data is missing'
     });
   }
+
   const car = {
     id: idGenerator(),
     name: req.body.name,
     color: req.body.color
   };
-  garage.concat(car);
+
+  garage = garage.concat(car);
   res.json(car);
 });
 
@@ -152,6 +154,4 @@ app.patch('/engine', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT);
