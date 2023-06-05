@@ -87,6 +87,27 @@ app.delete('/garage/:id', (req, res) => {
   });
 });
 
+app.put('/garage/:id', (req, res) => {
+  const car = garage.filter((car) => car.id == Number(req.params.id));
+  if (car.length === 0) {
+    return res.status(400).json({
+      error: 'NOT FOUND'
+    });
+  }
+  const updatedCar = {
+    id: Number(req.params.id),
+    name: req.body.name,
+    color: req.body.color
+  };
+  garage.forEach((car) => {
+    if (car.id == Number(req.params.id)) {
+      car.name = updatedCar.name;
+      car.color = updatedCar.color;
+      res.json(updatedCar);
+    }
+  });
+});
+
 app.patch('/engine', (req, res) => {
   const { id, status } = req.query;
 
