@@ -24,7 +24,7 @@ let garage = [
   }
 ];
 
-const winners = [
+let winners = [
   {
     id: 1,
     wins: 1,
@@ -42,7 +42,7 @@ app.get('/garage', (req, res) => {
   res.json(garage);
 });
 app.get('/garage/:id', (req, res) => {
-  const car = garage.forEach((car) => car.id == Number(req.params.id));
+  const car = garage.filter((car) => car.id == Number(req.params.id));
   if (car.length === 0) {
     return res.status(400).json({
       error: 'NOT FOUND'
@@ -70,6 +70,21 @@ app.post('/garage', (req, res) => {
 
   garage = garage.concat(car);
   res.json(car);
+});
+
+app.delete('/garage/:id', (req, res) => {
+  const car = garage.filter((car) => car.id == Number(req.params.id));
+  if (car.length === 0) {
+    return res.status(400).json({
+      error: 'NOT FOUND'
+    });
+  }
+  garage.forEach((car) => {
+    if (car.id == Number(req.params.id)) {
+      garage = garage.filter((car) => car.id !== Number(req.params.id));
+      res.json({});
+    }
+  });
 });
 
 app.patch('/engine', (req, res) => {
