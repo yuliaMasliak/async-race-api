@@ -41,6 +41,7 @@ const state = { velocity: {}, blocked: {} };
 app.get('/garage', (req, res) => {
   res.json(garage);
 });
+
 app.get('/garage/:id', (req, res) => {
   const car = garage.filter((car) => car.id == Number(req.params.id));
   if (car.length === 0) {
@@ -186,6 +187,53 @@ app.patch('/engine', (req, res) => {
           .send(JSON.stringify({ velocity, distance })),
       x
     );
+  }
+});
+
+//winners
+app.get('/winners', (req, res) => {
+  res.json(winners);
+});
+
+app.get('/winners/:id', (req, res) => {
+  const car = winners.filter((car) => car.id == Number(req.params.id));
+  if (car.length === 0) {
+    return res.status(400).json({
+      error: 'NOT FOUND'
+    });
+  } else {
+    res.json(car);
+  }
+});
+
+app.post('/winners', (req, res) => {
+  console.log(Number(req.body.id));
+  const existingCar = garage.find((car) => car.id == Number(req.body.id));
+  console.log(existingCar);
+  const existingWinner = winners.find((car) => car.id == Number(req.body.id));
+
+  if (!existingCar) {
+    return res.status(500).json({
+      error: 'no such car in garage'
+    });
+  }
+
+  if (existingWinner) {
+    winners.forEach((car) => {
+      if (car.id == Number(req.body.id)) {
+        car.wins += 1;
+        car.time =
+          car.time < Number(req.body.time) ? car.time : Number(req.body.time);
+      }
+    });
+  } else {
+    const winner = {
+      id: Number(req.body.id),
+      wins: Number(req.body.wins),
+      time: Number(req.body.time)
+    };
+    winners = winners.concat(winner);
+    res.json(winner);
   }
 });
 
