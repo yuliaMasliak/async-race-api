@@ -41,16 +41,15 @@ const state = { velocity: {}, blocked: {} };
 app.get('/garage', (req, res) => {
   const currentPage = req.query._page;
   const currentPageLimit = req.query._limit;
-  res.setHeader('X-Total-Count', `${garage.length}`);
   res.statusMessage = 'OK';
   if (currentPage && currentPageLimit) {
     const chunk = garage.slice(
       (currentPage - 1) * currentPageLimit,
       currentPage * currentPageLimit
     );
-    res.status(200).json(chunk);
+    res.header('X-Total-Count', `${garage.length}`).status(200).json(chunk);
   } else {
-    res.status(200).json(garage);
+    res.header('X-Total-Count', `${garage.length}`).status(200).json(garage);
   }
 });
 
