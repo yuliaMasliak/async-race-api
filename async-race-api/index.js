@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const router = express.Router();
 
 let garage = [
   {
@@ -39,10 +38,12 @@ app.use(express.json());
 
 const state = { velocity: {}, blocked: {} };
 
-router.get('/garage', (req, res, next) => {
-  res.setHeader({ 'X-Total-Count': `${garage.length}` });
-  next();
-});
+const options = {
+  setHeaders: function (res, path, stat) {
+    res.set('X-Total-Count', garage.length);
+  }
+};
+app.use(express.static('/garage', options));
 
 app.get('/garage', (req, res) => {
   // const currentPage = req.query._page;
