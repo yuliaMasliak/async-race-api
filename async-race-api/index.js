@@ -39,6 +39,9 @@ app.use(express.json());
 const state = { velocity: {}, blocked: {} };
 
 app.get('/garage', (req, res) => {
+  const currentPage = req.query._page;
+  const currentPagelimit = req.query._limit;
+  res.setHeader('X-Total-Count', garage.length);
   res.json(garage);
 });
 
