@@ -39,21 +39,21 @@ app.use(express.json());
 const state = { velocity: {}, blocked: {} };
 
 app.get('/garage', (req, res) => {
-  res.setHeader('X-Total-Count', `${garage.length}`);
-  res.writeHead(200, { 'X-Total-Count': `${garage.length}` });
+  res.append('X-Total-Count', garage.length);
+  res.append('Access-Control-Expose-Headers', 'X-Total-Count');
 
-  // const currentPage = req.query._page;
-  // const currentPageLimit = req.query._limit;
-  // res.statusMessage = 'OK';
-  // if (currentPage && currentPageLimit) {
-  //   const chunk = garage.slice(
-  //     (currentPage - 1) * currentPageLimit,
-  //     currentPage * currentPageLimit
-  //   );
-  //   res.status(200).json(chunk);
-  // } else {
-  res.status(200).json(garage);
-  // }
+  const currentPage = req.query._page;
+  const currentPageLimit = req.query._limit;
+  res.statusMessage = 'OK';
+  if (currentPage && currentPageLimit) {
+    const chunk = garage.slice(
+      (currentPage - 1) * currentPageLimit,
+      currentPage * currentPageLimit
+    );
+    res.status(200).json(chunk);
+  } else {
+    res.status(200).json(garage);
+  }
 });
 
 app.get('/garage/:id', (req, res) => {
@@ -208,12 +208,26 @@ app.patch('/engine', (req, res) => {
 
 //winners
 app.get('/winners', (req, res) => {
-  res.json(winners);
+  res.append('X-Total-Count', winners.length);
+  res.append('Access-Control-Expose-Headers', 'X-Total-Count');
+
+  const currentPage = req.query._page;
+  const currentPageLimit = req.query._limit;
+  res.statusMessage = 'OK';
+  if (currentPage && currentPageLimit) {
+    const chunk = winners.slice(
+      (currentPage - 1) * currentPageLimit,
+      currentPage * currentPageLimit
+    );
+    res.status(200).json(chunk);
+  } else {
+    res.status(200).json(winners);
+  }
 });
 
 app.get('/winners/:id', (req, res) => {
-  const car = winners.filter((car) => car.id == Number(req.params.id));
-  if (car.length === 0) {
+  const car = winners.find((car) => car.id == Number(req.params.id));
+  if (!car) {
     return res.status(400).json({
       error: 'NOT FOUND'
     });
@@ -223,22 +237,13 @@ app.get('/winners/:id', (req, res) => {
 });
 
 app.post('/winners', (req, res) => {
-  const existingCar = garage.find((car) => car.id == Number(req.body.id));
   const existingWinner = winners.find((car) => car.id == Number(req.body.id));
 
-  if (!existingCar) {
-    return res.status(500).json({
-      error: 'no such car in garage'
-    });
-  }
-
   if (existingWinner) {
-    winners.forEach((car) => {
-      if (car.id == Number(req.body.id)) {
-        car.wins += 1;
-        car.time =
-          car.time < Number(req.body.time) ? car.time : Number(req.body.time);
-      }
+    res.status(500);
+    res.statusMessage = 'Insert failed, duplicate id';
+    return res.json({
+      error: 'INTERNAL SERVER ERROR'
     });
   } else {
     const winner = {
@@ -247,6 +252,8 @@ app.post('/winners', (req, res) => {
       time: Number(req.body.time)
     };
     winners = winners.concat(winner);
+    res.statusCode = 201;
+    res.statusMessage = 'CREATED';
     res.json(winner);
   }
 });
@@ -254,39 +261,46 @@ app.post('/winners', (req, res) => {
 app.delete('/winner/:id', (req, res) => {
   const winner = winners.find((car) => car.id == Number(req.params.id));
   if (!winner) {
-    return res.status(404).json({
-      error: 'WINNER NOT FOUND'
+    res.status(404);
+    res.statusMessage = 'NOT FOUND';
+    return res.json({});
+  } else {
+    winners.forEach((car) => {
+      if (car.id == Number(req.params.id)) {
+        winners = winners.filter((car) => car.id !== Number(req.params.id));
+        res.statusCode = 200;
+        res.statusMessage = 'OK';
+        res.json({});
+      }
     });
   }
-  winners.forEach((car) => {
-    if (car.id == Number(req.params.id)) {
-      winners = winners.filter((car) => car.id !== Number(req.params.id));
-      res.json({});
-    }
-  });
 });
 
 app.put('/winners/:id', (req, res) => {
-  console.log(req.params.id);
   const winner = winners.find((car) => car.id == Number(req.params.id));
   if (!winner) {
-    return res.status(400).json({
-      error: 'WINNER NOT FOUND'
-    });
+    res.status(404);
+    res.statusMessage = 'NOT FOUND';
+    return res.json({});
   }
   const updatedCar = {
-    wins: req.body.wins,
-    time: req.body.time,
+    wins: Number(req.body.wins),
+    time: Number(req.body.time),
     id: req.params.id
   };
   winners.forEach((car) => {
-    if (car.id == Number(req.params.id)) {
-      car.wins = Number(req.params.wins);
-      car.time = Number(req.params.time);
-      res.json(updatedCar);
+    if (car.id == updatedCar.id) {
+      car.wins += 1;
+      car.time = car.time < updatedCar.time ? car.time : updatedCar.time;
     }
+    res.statusCode = 200;
+    res.statusMessage = 'OK';
+    return res.json(car);
   });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT);
+
+app.listen(PORT, () => {
+  console.log(`App running at ${PORT}`);
+});
