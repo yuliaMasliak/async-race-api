@@ -40,6 +40,7 @@ const state = { velocity: {}, blocked: {} };
 
 app.get('/garage', (req, res) => {
   res.setHeader('X-Total-Count', `${garage.length}`);
+  res.writeHead(200, { 'X-Total-Count': `${garage.length}` });
 
   // const currentPage = req.query._page;
   // const currentPageLimit = req.query._limit;
