@@ -38,6 +38,11 @@ app.use(express.json());
 
 const state = { velocity: {}, blocked: {} };
 
+app.use('/garage', (req, res, next) => {
+  res.header('X-Total-Count', `${garage.length}`);
+  next();
+});
+
 app.get('/garage', (req, res) => {
   const currentPage = req.query._page;
   const currentPageLimit = req.query._limit;
@@ -47,9 +52,9 @@ app.get('/garage', (req, res) => {
       (currentPage - 1) * currentPageLimit,
       currentPage * currentPageLimit
     );
-    res.header('X-Total-Count', `${garage.length}`).status(200).json(chunk);
+    res.status(200).json(chunk);
   } else {
-    res.header('X-Total-Count', `${garage.length}`).status(200).json(garage);
+    res.status(200).json(garage);
   }
 });
 
