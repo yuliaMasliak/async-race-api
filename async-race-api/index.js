@@ -39,7 +39,7 @@ app.use(express.json());
 const state = { velocity: {}, blocked: {} };
 
 app.use('/garage', (req, res, next) => {
-  res.send({ 'X-Total-Count': `${garage.length}` });
+  res.setHeader({ 'X-Total-Count': `${garage.length}` });
   next();
 });
 
