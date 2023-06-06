@@ -42,8 +42,8 @@ app.get('/garage', (req, res) => {
   const currentPage = req.query._page;
   const currentPageLimit = req.query._limit;
 
-  res.writeHead(200, { 'X-Total-Count': garage.length });
-  res.statusMessage = 'OK';
+  // res.writeHead(200, { 'X-Total-Count': garage.length });
+  // res.statusMessage = 'OK';
   // if (currentPage && currentPageLimit) {
   //   const chunk = garage.slice(
   //     (currentPage - 1) * currentPageLimit,
