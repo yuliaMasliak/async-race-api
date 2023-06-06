@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const router = express.Router();
 
 let garage = [
   {
@@ -38,24 +39,24 @@ app.use(express.json());
 
 const state = { velocity: {}, blocked: {} };
 
-app.use('/garage', (req, res, next) => {
+router.get('/garage', (req, res, next) => {
   res.setHeader({ 'X-Total-Count': `${garage.length}` });
   next();
 });
 
 app.get('/garage', (req, res) => {
-  const currentPage = req.query._page;
-  const currentPageLimit = req.query._limit;
-  res.statusMessage = 'OK';
-  if (currentPage && currentPageLimit) {
-    const chunk = garage.slice(
-      (currentPage - 1) * currentPageLimit,
-      currentPage * currentPageLimit
-    );
-    res.status(200).json(chunk);
-  } else {
-    res.status(200).json(garage);
-  }
+  // const currentPage = req.query._page;
+  // const currentPageLimit = req.query._limit;
+  // res.statusMessage = 'OK';
+  // if (currentPage && currentPageLimit) {
+  //   const chunk = garage.slice(
+  //     (currentPage - 1) * currentPageLimit,
+  //     currentPage * currentPageLimit
+  //   );
+  //   res.status(200).json(chunk);
+  // } else {
+  res.status(200).json(garage);
+  // }
 });
 
 app.get('/garage/:id', (req, res) => {
