@@ -41,20 +41,18 @@ const state = { velocity: {}, blocked: {} };
 app.get('/garage', (req, res) => {
   const currentPage = req.query._page;
   const currentPageLimit = req.query._limit;
-  if (currentPage < 1) {
-    currentPage = 1;
-  }
+
   res.writeHead(200, { 'X-Total-Count': garage.length });
   res.statusMessage = 'OK';
-  if (currentPage && currentPageLimit) {
-    const chunk = garage.slice(
-      (currentPage - 1) * currentPageLimit,
-      currentPage * currentPageLimit
-    );
-    res.status(200).json(chunk);
-  } else {
-    res.status(200).json(garage);
-  }
+  // if (currentPage && currentPageLimit) {
+  //   const chunk = garage.slice(
+  //     (currentPage - 1) * currentPageLimit,
+  //     currentPage * currentPageLimit
+  //   );
+  //   res.status(200).json(chunk);
+  // } else {
+  res.status(200).json(garage);
+  // }
 });
 
 app.get('/garage/:id', (req, res) => {
