@@ -44,15 +44,15 @@ app.get('/garage', (req, res) => {
 
   res.setHeader('X-Total-Count', garage.length);
   res.statusMessage = 'OK';
-  // if (currentPage && currentPageLimit) {
-  //   const chunk = garage.slice(
-  //     (currentPage - 1) * currentPageLimit,
-  //     currentPage * currentPageLimit
-  //   );
-  //   res.status(200).json(chunk);
-  // } else {
-  res.status(200).json(garage);
-  // }
+  if (currentPage && currentPageLimit) {
+    const chunk = garage.slice(
+      (currentPage - 1) * currentPageLimit,
+      currentPage * currentPageLimit
+    );
+    res.status(200).json(chunk);
+  } else {
+    res.status(200).json(garage);
+  }
 });
 
 app.get('/garage/:id', (req, res) => {
