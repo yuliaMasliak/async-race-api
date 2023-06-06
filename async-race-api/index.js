@@ -41,15 +41,11 @@ const state = { velocity: {}, blocked: {} };
 app.get('/garage', (req, res) => {
   res.append('X-Total-Count', garage.length);
   res.append('Access-Control-Expose-Headers', 'X-Total-Count');
+  const { _page, _limit } = req.query;
 
-  const currentPage = req.query._page;
-  const currentPageLimit = req.query._limit;
   res.statusMessage = 'OK';
-  if (currentPage && currentPageLimit) {
-    const chunk = garage.slice(
-      (currentPage - 1) * currentPageLimit,
-      currentPage * currentPageLimit
-    );
+  if (_page && _limit) {
+    const chunk = garage.slice((_page - 1) * _limit, _page * _limit);
     res.status(200).json(chunk);
   } else {
     res.status(200).json(garage);
@@ -210,15 +206,28 @@ app.patch('/engine', (req, res) => {
 app.get('/winners', (req, res) => {
   res.append('X-Total-Count', winners.length);
   res.append('Access-Control-Expose-Headers', 'X-Total-Count');
+  const { _page, _limit, _sort, _order } = req.query;
 
-  const currentPage = req.query._page;
-  const currentPageLimit = req.query._limit;
+  const sortedChunk = (chunk) => {
+    if (_order == 'ASC') {
+      return chunk.sort((a, b) => {
+        return a[_sort] - b[_sort];
+      });
+    } else if (_order == 'DESC') {
+      return chunk.sort((a, b) => {
+        return b[_sort] - a[_sort];
+      });
+    }
+  };
+
   res.statusMessage = 'OK';
-  if (currentPage && currentPageLimit) {
-    const chunk = winners.slice(
-      (currentPage - 1) * currentPageLimit,
-      currentPage * currentPageLimit
-    );
+
+  if (_page && _limit) {
+    const chunk = winners.slice((_page - 1) * _limit, _page * _limit);
+    if (_sort && _order) {
+      sortedChunk(chunk);
+      res.status(200).json(sortedChunk(chunk));
+    }
     res.status(200).json(chunk);
   } else {
     res.status(200).json(winners);
@@ -282,21 +291,20 @@ app.put('/winners/:id', (req, res) => {
     res.status(404);
     res.statusMessage = 'NOT FOUND';
     return res.json({});
+  } else if (winner) {
+    let updatedCar = {};
+    winners.forEach((car) => {
+      if (car.id == req.params.id) {
+        car.wins += 1;
+        car.time =
+          car.time < Number(req.body.time) ? car.time : Number(req.body.time);
+        updatedCar.wins = car.wins;
+        updatedCar.time = car.time;
+        updatedCar.id = car.id;
+      }
+    });
+    return res.status(200).json(updatedCar);
   }
-  const updatedCar = {
-    wins: Number(req.body.wins),
-    time: Number(req.body.time),
-    id: req.params.id
-  };
-  winners.forEach((car) => {
-    if (car.id == updatedCar.id) {
-      car.wins += 1;
-      car.time = car.time < updatedCar.time ? car.time : updatedCar.time;
-    }
-    res.statusCode = 200;
-    res.statusMessage = 'OK';
-    return res.json(car);
-  });
 });
 
 const PORT = process.env.PORT || 3000;
