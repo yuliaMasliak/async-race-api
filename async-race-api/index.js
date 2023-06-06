@@ -38,14 +38,11 @@ app.use(express.json());
 
 const state = { velocity: {}, blocked: {} };
 
-const options = {
-  setHeaders: function (res, path, stat) {
-    res.set('X-Total-Count', garage.length);
-  }
-};
-app.use(express.static('/garage', options));
-
-app.get('/garage', (req, res) => {
+app.get('/garage', (req, res, next) => {
+  res.set({
+    'X-Total-Count': garage.length
+  });
+  next();
   // const currentPage = req.query._page;
   // const currentPageLimit = req.query._limit;
   // res.statusMessage = 'OK';
