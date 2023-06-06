@@ -41,27 +41,28 @@ const state = { velocity: {}, blocked: {} };
 app.get('/garage', (req, res) => {
   const currentPage = req.query._page;
   const currentPageLimit = req.query._limit;
-  res.setHeader('X-Total-Count', garage.length);
-
+  res.writeHead(200, { 'X-Total-Count': garage.length });
+  res.statusMessage = 'OK';
   if (currentPage && currentPageLimit) {
     const chunk = garage.slice(
       (currentPage - 1) * currentPageLimit,
       currentPage * currentPageLimit
     );
-    res.json(chunk);
+    res.status(200).json(chunk);
   } else {
-    res.json(garage);
+    res.status(200).json(garage);
   }
 });
 
 app.get('/garage/:id', (req, res) => {
-  const car = garage.filter((car) => car.id == Number(req.params.id));
-  if (car.length === 0) {
-    return res.status(400).json({
-      error: 'NOT FOUND'
-    });
+  const car = garage.find((car) => car.id == Number(req.params.id));
+  if (!car) {
+    res.statusCode = 404;
+    res.statusMessage = 'NOT FOUND';
+    return res.json({});
   } else {
-    res.json(car);
+    res.statusMessage = 'OK';
+    res.status(200).json(car);
   }
 });
 
@@ -69,43 +70,42 @@ app.post('/garage', (req, res) => {
   const idGenerator = () => {
     return garage.length ? Math.max(...garage.map((car) => car.id)) + 1 : 0;
   };
-  if (!req.body.name || !req.body.color) {
-    return res.status(400).json({
-      error: 'data is missing'
-    });
-  }
 
-  const car = {
-    id: idGenerator(),
-    name: req.body.name,
-    color: req.body.color
+  const car = (name = 'Car', color = '#FFFFFF') => {
+    const obj = { id: idGenerator(), name: name, color: color };
+    return obj;
   };
 
-  garage = garage.concat(car);
-  res.json(car);
+  garage = garage.concat(car(req.body.name, req.body.color));
+  res.statusCode = 201;
+  res.statusMessage = 'CREATED';
+  res.json(car(req.body.name, req.body.color));
 });
 
 app.delete('/garage/:id', (req, res) => {
-  const car = garage.filter((car) => car.id == Number(req.params.id));
-  if (car.length === 0) {
-    return res.status(400).json({
-      error: 'NOT FOUND'
+  const car = garage.find((car) => car.id == Number(req.params.id));
+  if (!car) {
+    res.status(404);
+    res.statusMessage = 'NOT FOUND';
+    res.json({});
+  } else {
+    garage.forEach((car) => {
+      if (car.id == Number(req.params.id)) {
+        garage = garage.filter((car) => car.id !== Number(req.params.id));
+        res.status(200);
+        res.statusMessage = 'OK';
+        res.json({});
+      }
     });
   }
-  garage.forEach((car) => {
-    if (car.id == Number(req.params.id)) {
-      garage = garage.filter((car) => car.id !== Number(req.params.id));
-      res.json({});
-    }
-  });
 });
 
 app.put('/garage/:id', (req, res) => {
-  const car = garage.filter((car) => car.id == Number(req.params.id));
-  if (car.length === 0) {
-    return res.status(400).json({
-      error: 'NOT FOUND'
-    });
+  const car = garage.find((car) => car.id == Number(req.params.id));
+  if (!car) {
+    res.status(404);
+    res.statusMessage = 'NOT FOUND';
+    res.json({});
   }
   const updatedCar = {
     id: Number(req.params.id),
@@ -116,6 +116,8 @@ app.put('/garage/:id', (req, res) => {
     if (car.id == Number(req.params.id)) {
       car.name = updatedCar.name;
       car.color = updatedCar.color;
+      res.status(200);
+      res.statusMessage = 'OK';
       res.json(updatedCar);
     }
   });
