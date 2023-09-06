@@ -25,11 +25,7 @@ let garage = [
 ];
 
 let winners = [
-  {
-    id: 1,
-    wins: 1,
-    time: 10
-  }
+
 ];
 
 const app = express();
